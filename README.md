@@ -23,3 +23,12 @@ node main.js
 ```
 
 Then invite the bot user to the rooms it should be active in. Only public and unencrypted rooms are supported.
+
+## Running it on the homeserver
+
+```bash
+git clone https://github.com/codefreezefi/matrix-guysbot-node
+cd matrix-guysbot-node
+npm ci
+sudo systemd-run --setenv=ACCESS_TOKEN=<access_token> --working-directory=${PWD} node main.js
+```
