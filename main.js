@@ -1,5 +1,4 @@
 import * as sdk from "matrix-js-sdk";
-import { IndexedDBStore } from "matrix-js-sdk";
 
 const accessToken = process.env.ACCESS_TOKEN;
 const homeserver = process.env.HOMESERVER ?? "matrix.codefreeze.fi";
@@ -10,7 +9,6 @@ const client = sdk.createClient({
   baseUrl: `https://${homeserver}`,
   accessToken,
   userId,
-  store: new IndexedDBStore()
 });
 
 // Automatically join rooms when invited
@@ -25,49 +23,57 @@ client.on("RoomMember.membership", (event, member) => {
 
 const needsSuggestion = (message) => /guys/.test(message);
 
+const repliedTo = {};
+
 //Print out messages for all rooms
 client.on("Room.timeline", (event, room, toStartOfTimeline) => {
   if (event.getType() !== "m.room.message") {
+    console.debug("only print messages");
     return; // only print messages
   }
   if (toStartOfTimeline) {
+    console.debug(`don't print paginated results`);
     return; // don't print paginated results
   }
-  console.log(
-    // the room name will update with m.room.name events automatically
-    "(%s) %s :: %s",
-    room.name,
-    event.getSender(),
-    event.getContent().body,
-    toStartOfTimeline
-  );
-  console.log(event);
-  if (needsSuggestion(event.getContent().body)) {
-    console.log(event);
-    client.sendEvent(
-      room.roomId,
-      "m.room.message",
-      {
-        body: `Hei ${event.sender.name}, when addressing a group of people, please consider something more inclusive then guys, for example all, or folks! Thanks! 🙏🏻`,
-        msgtype: "m.notice",
-        format: "org.matrix.custom.html",
-        formatted_body: `Hei ${event.sender.name}, when addressing a group of people, please consider something more inclusive then <em>guys</em>, for example all, or folks! Thanks! 🙏🏻`,
-        "m.relates_to": {
-          "m.in_reply_to": {
-            event_id: event.event_id,
-          },
+  if (event.sender.userId === userId) {
+    console.debug(`Ignore my own messages`);
+    return; // Ignore my own messages
+  }
+  console.debug(event.event.event_id, repliedTo);
+  if (repliedTo[event.event.event_id] !== undefined) {
+    console.debug(`Already replied`);
+    return; // Already replied
+  }
+  console.log(`message`, event.getContent().body);
+  if (!needsSuggestion(event.getContent().body)) {
+    console.debug(`message is fine`);
+    return; // Message is fine
+  }
+  repliedTo[event.event.event_id] = true;
+  client.sendEvent(
+    room.roomId,
+    "m.room.message",
+    {
+      body: `Hei ${event.sender.name}, when addressing a group of people, please consider something more inclusive than guys, for example craftspeople, all, or folks! Thanks! 🙏🏻`,
+      msgtype: "m.notice",
+      format: "org.matrix.custom.html",
+      formatted_body: `Hei ${event.sender.name}, when addressing a group of people, please consider something more inclusive than <em>guys</em>, for example <em>craftspeople</em>, <em>all</em>, or <em>folks</em>! Thanks! 🙏🏻`,
+      "m.relates_to": {
+        "m.in_reply_to": {
+          event_id: event.event.event_id,
         },
       },
-      "",
-      (err, res) => {
-        console.log(err);
-      }
-    );
-  }
-
-  process.exit(0);
+    },
+    "",
+    (err, res) => {
+      console.log(err);
+    }
+  );
 });
 
 client.on("error", (err) => console.error(err));
 
-await client.startClient({ initialSyncLimit: 10 });
+await client.startClient({
+  // Do not fetch historical messages
+  initialSyncLimit: 0,
+});
