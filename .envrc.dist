@@ -1,0 +1,4 @@
+export ACCESS_TOKEN=syt_...
+# Optional:
+# export USER_NAME=@guysbot
+# export HOMESERVER=matrix.codefreeze.fi

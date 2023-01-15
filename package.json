@@ -1,0 +1,17 @@
+{
+  "name": "@codefreeze/matrix-guysbot",
+  "version": "0.0.0-development",
+  "description": "Bot for the Codefreeze Matrix instance to encourage more inclusive language",
+  "type": "module",
+  "dependencies": {
+    "matrix-js-sdk": "23.0.0"
+  },
+  "homepage": "https://github.com/codefreezefi/matrix-guysbot-node",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codefreezefi/matrix-guysbot-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/codefreezefi/matrix-guysbot-node/issues"
+  }
+}
