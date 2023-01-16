@@ -39,24 +39,27 @@ client.on("Room.timeline", (event, room, toStartOfTimeline) => {
     console.debug(`Ignore my own messages`);
     return; // Ignore my own messages
   }
-  console.debug(event.event.event_id, repliedTo);
-  if (repliedTo[event.event.event_id] !== undefined) {
+  const event_id = event.event.event_id;
+  console.debug(event_id, repliedTo);
+  if (repliedTo[event_id] !== undefined) {
     console.debug(`Already replied`);
     return; // Already replied
   }
+  const content = event.getContent();
   console.log(JSON.stringify(event));
-  console.log(`message`, event.getContent().body);
-  if (!needsSuggestion(event.getContent().body)) {
+  console.log(`message`, content.body);
+  if (!needsSuggestion(content.body)) {
     console.debug(`message is fine`);
     return; // Message is fine
   }
-  repliedTo[event.event.event_id] = true;
+  repliedTo[event_id] = true;
   client.sendEvent(
     room.roomId,
     "m.room.message",
     suggestion({
       senderName: event.sender.name,
-      event_id: event.event.event_id,
+      event_id: event_id,
+      thread_root: content["m.relates_to"]?.event_id ?? event_id,
     }),
     "",
     (err, res) => {
