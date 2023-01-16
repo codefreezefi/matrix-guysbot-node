@@ -1,4 +1,5 @@
 import * as sdk from "matrix-js-sdk";
+import { needsSuggestion } from "./needsSuggestion.js";
 
 const accessToken = process.env.ACCESS_TOKEN;
 const homeserver = process.env.HOMESERVER ?? "matrix.codefreeze.fi";
@@ -21,8 +22,6 @@ client.on("RoomMember.membership", (event, member) => {
   }
 });
 
-const needsSuggestion = (message) => /guys/.test(message);
-
 const repliedTo = {};
 
 //Print out messages for all rooms
@@ -44,6 +43,7 @@ client.on("Room.timeline", (event, room, toStartOfTimeline) => {
     console.debug(`Already replied`);
     return; // Already replied
   }
+  console.log(JSON.stringify(event));
   console.log(`message`, event.getContent().body);
   if (!needsSuggestion(event.getContent().body)) {
     console.debug(`message is fine`);

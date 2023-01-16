@@ -3,6 +3,9 @@
   "version": "0.0.0-development",
   "description": "Bot for the Codefreeze Matrix instance to encourage more inclusive language",
   "type": "module",
+  "scripts": {
+    "test": "node *.spec.js"
+  },
   "dependencies": {
     "matrix-js-sdk": "23.0.0"
   },
