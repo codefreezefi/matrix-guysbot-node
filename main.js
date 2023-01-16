@@ -1,5 +1,6 @@
 import * as sdk from "matrix-js-sdk";
 import { needsSuggestion } from "./needsSuggestion.js";
+import { suggestion } from "./suggestion.js";
 
 const accessToken = process.env.ACCESS_TOKEN;
 const homeserver = process.env.HOMESERVER ?? "matrix.codefreeze.fi";
@@ -53,17 +54,10 @@ client.on("Room.timeline", (event, room, toStartOfTimeline) => {
   client.sendEvent(
     room.roomId,
     "m.room.message",
-    {
-      body: `Hei ${event.sender.name}, when addressing a group of people, please consider something more inclusive than guys, for example craftspeople, all, or folks! Thanks! 🙏🏻`,
-      msgtype: "m.notice",
-      format: "org.matrix.custom.html",
-      formatted_body: `Hei ${event.sender.name}, when addressing a group of people, please consider something more inclusive than <em>guys</em>, for example <em>craftspeople</em>, <em>all</em>, or <em>folks</em>! Thanks! 🙏🏻`,
-      "m.relates_to": {
-        "m.in_reply_to": {
-          event_id: event.event.event_id,
-        },
-      },
-    },
+    suggestion({
+      senderName: event.sender.name,
+      event_id: event.event.event_id,
+    }),
     "",
     (err, res) => {
       console.log(err);

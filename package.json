@@ -4,7 +4,7 @@
   "description": "Bot for the Codefreeze Matrix instance to encourage more inclusive language",
   "type": "module",
   "scripts": {
-    "test": "node *.spec.js"
+    "test": "node --test"
   },
   "dependencies": {
     "matrix-js-sdk": "23.0.0"
@@ -16,5 +16,8 @@
   },
   "bugs": {
     "url": "https://github.com/codefreezefi/matrix-guysbot-node/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
