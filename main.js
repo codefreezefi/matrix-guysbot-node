@@ -1,11 +1,12 @@
 import * as sdk from "matrix-js-sdk";
 import { needsSuggestion } from "./needsSuggestion.js";
 import { suggestion } from "./suggestion.js";
+import pJson from "./package.json" assert { type: "json" };
 
 const accessToken = process.env.ACCESS_TOKEN;
 const homeserver = process.env.HOMESERVER ?? "matrix.codefreeze.fi";
-const username = process.env.USER_NAME ?? "@guysbot";
-const userId = `${username}:${homeserver}`;
+const botUsername = process.env.USER_NAME ?? "@guysbot";
+const userId = `${botUsername}:${homeserver}`;
 
 const client = sdk.createClient({
   baseUrl: `https://${homeserver}`,
@@ -25,7 +26,10 @@ client.on("RoomMember.membership", (event, member) => {
 
 const repliedTo = {};
 
-//Print out messages for all rooms
+const check = needsSuggestion({
+  allowList: [botUsername.replace(/^@/, ""), pJson.homepage],
+});
+
 client.on("Room.timeline", (event, room, toStartOfTimeline) => {
   if (event.getType() !== "m.room.message") {
     console.debug("only print messages");
@@ -48,7 +52,7 @@ client.on("Room.timeline", (event, room, toStartOfTimeline) => {
   const content = event.getContent();
   console.log(JSON.stringify(event));
   console.log(`message`, content.body);
-  if (!needsSuggestion(content.body)) {
+  if (!check(content.body)) {
     console.debug(`message is fine`);
     return; // Message is fine
   }
